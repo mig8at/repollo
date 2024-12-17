@@ -1,6 +1,6 @@
-# MyCollection: Generic Data Collection Library for Go
+# Repollo: Generic Data Collection Library for Go
 
-MyCollection is a simple and flexible Go library for managing collections of data. It provides methods to create, query, and manipulate collections using powerful filtering and transformation techniques. Designed for modularity and ease of use, it is ideal for projects requiring efficient and reusable data management.
+Repollo is a simple and flexible Go library for managing collections of data. It provides methods to create, query, and manipulate collections using powerful filtering and transformation techniques. Designed for modularity and ease of use, it is ideal for projects requiring efficient and reusable data management.
 
 ---
 
@@ -10,6 +10,7 @@ MyCollection is a simple and flexible Go library for managing collections of dat
 - **CRUD Operations**: Create, Read, Update, and Delete elements in collections.
 - **Query Chaining**: Filter, sort, and limit data using a functional style.
 - **Thread-Safe**: Built-in concurrency safety using mutexes.
+- **Event Streams**: Subscribe to collection events using channels.
 
 ---
 
@@ -65,7 +66,22 @@ sorted := users.Where(func(u string) bool {
 fmt.Println(sorted)
 ```
 
-### 4. Thread Safety
+### 4. Event Subscription
+
+Listen to collection events using the `Events` method:
+
+```go
+eventChannel := users.Events()
+go func() {
+    for event := range eventChannel {
+        fmt.Printf("Event: %s, Key: %s, Value: %+v\n", event.Type, event.Key, event.Value)
+    }
+}()
+
+users.Create("3", "Charlie")
+```
+
+### 5. Thread Safety
 
 MyCollection ensures that operations are thread-safe, so you can use it in concurrent environments without additional locking mechanisms.
 
@@ -81,6 +97,7 @@ MyCollection ensures that operations are thread-safe, so you can use it in concu
 - `Update(key string, value T) error`: Updates an existing item.
 - `Delete(key string) error`: Deletes an item by key.
 - `Where(predicate func(T) bool) *QueryResult[T]`: Filters the collection based on a predicate.
+- `Events() <-chan Event[T]`: Returns a channel that emits collection events.
 
 ### QueryResult Methods
 
@@ -88,6 +105,34 @@ MyCollection ensures that operations are thread-safe, so you can use it in concu
 - `Limit(n int) *QueryResult[T]`: Limits the number of results.
 - `Offset(n int) *QueryResult[T]`: Skips the first `n` results.
 - `Sort(less func(a, b T) bool) *QueryResult[T]`: Sorts results based on a comparison function.
+
+---
+
+## Running Tests
+
+To test the library, use:
+
+```bash
+go test ./...
+```
+
+Example test case:
+
+```go
+func TestCollection(t *testing.T) {
+    users := mycollection.NewCollection[string]()
+    users.Create("1", "Alice")
+    users.Create("2", "Bob")
+
+    filtered := users.Where(func(u string) bool {
+        return u == "Alice"
+    }).Results()
+
+    if len(filtered) != 1 || filtered[0] != "Alice" {
+        t.Errorf("Expected [Alice], got %+v", filtered)
+    }
+}
+```
 
 ---
 
