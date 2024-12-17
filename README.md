@@ -37,9 +37,14 @@ import "github.com/your-username/mycollection"
 Create a new collection to manage your data:
 
 ```go
-users := mycollection.NewCollection[string]()
-users.Create("1", "Alice")
-users.Create("2", "Bob")
+type User struct {
+	Name string
+	Age  int
+}
+
+users := mycollection.NewCollection[User]()
+users.Create("1", User{"Alice Smith", 25})
+users.Create("2", User{"Bob Johnson", 30})
 ```
 
 ### 2. Querying Data
@@ -47,10 +52,10 @@ users.Create("2", "Bob")
 Use the `Where` method to filter data:
 
 ```go
-filtered := users.Where(func(u string) bool {
-    return u == "Alice"
+filtered := users.Where(func(u User) bool {
+    return u.Name == "Alice Smith"
 }).Results()
-fmt.Println(filtered) // Output: ["Alice"]
+fmt.Println(filtered) // User
 ```
 
 ### 3. Advanced Query Chaining
@@ -58,8 +63,8 @@ fmt.Println(filtered) // Output: ["Alice"]
 Perform more complex operations like limiting, offsetting, and sorting:
 
 ```go
-sorted := users.Where(func(u string) bool {
-    return len(u) > 3
+sorted := users.Where(func(u User) bool {
+    return u.Age > 20
 }).Sort(func(a, b string) bool {
     return a < b
 }).Limit(1).Results()
@@ -78,7 +83,7 @@ go func() {
     }
 }()
 
-users.Create("3", "Charlie")
+users.Create("2", User{"Bob Johnson", 30})
 ```
 
 ### 5. Thread Safety
@@ -120,18 +125,23 @@ Example test case:
 
 ```go
 func TestCollection(t *testing.T) {
-    users := mycollection.NewCollection[string]()
-    users.Create("1", "Alice")
-    users.Create("2", "Bob")
+	users := NewCollection[User]()
+	users.Create("1", User{"Alice Smith", 25})
+	users.Create("2", User{"Bob Johnson", 30})
 
-    filtered := users.Where(func(u string) bool {
-        return u == "Alice"
-    }).Results()
+	if len(users.data) != 2 {
+		t.Errorf("Expected 2 users, got %d", len(users.data))
+	}
 
-    if len(filtered) != 1 || filtered[0] != "Alice" {
-        t.Errorf("Expected [Alice], got %+v", filtered)
-    }
+	filtered := users.Where(func(u User) bool {
+		return u.Name == "Alice Smith"
+	}).Results()
+
+	if len(filtered) != 1 || filtered[0].Name != "Alice Smith" {
+		t.Errorf("Expected 'Alice', got %+v", filtered)
+	}
 }
+
 ```
 
 ---
