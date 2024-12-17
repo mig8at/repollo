@@ -19,13 +19,13 @@ Repollo is a simple and flexible Go library for managing collections of data. It
 To install the library, run:
 
 ```bash
-go get github.com/your-username/mycollection
+go get github.com/mig8at/repollo
 ```
 
 Import the library in your project:
 
 ```go
-import "github.com/your-username/mycollection"
+import "github.com/mig8at/repollo"
 ```
 
 ---
